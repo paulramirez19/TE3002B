@@ -7,5 +7,6 @@
     ki_angle: -0.03
     ke_act: 50.0
     error_threshold_dis: 0.1
-    error_threshold_ang: 0.3
+    error_threshold_ang: 0.1
+    angle_sensitivity: 20.0
 

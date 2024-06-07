@@ -5,6 +5,7 @@
 //#define DEBUG_ERRORS
 //#define DEBUG_ODOMETRY
 //#define DEBUG_CONTROL
+//#define DEBUG_ACT
 
 
 /*****************************
@@ -26,6 +27,11 @@
 
 using namespace std::chrono_literals;
 
+enum control_mode{
+    POS_MODE,
+    LINE_MODE
+};
+
 class Controller : public rclcpp::Node
 {
 public:
@@ -45,7 +51,8 @@ public:
                 {"kp_distance", 0.5},
                 {"kp_angle", 0.15},
                 {"ki_angle", -0.03},
-                {"ke_act", 50.0}
+                {"ke_act", 50.0},
+                {"angle_sensitivity", 30.0}
             }
         );
         
@@ -115,6 +122,9 @@ private:
         double ki_angle_ = get_parameter("ki_angle").as_double();
         double ke_act_ = get_parameter("ke_act").as_double();
         //double kp_distance_ = get_parameter("kp_distance").as_double();
+        double angle_sensitivity_ = get_parameter("angle_sensitivity").as_double();
+
+
 
         error_angle_ = errors_.error_ang;
         error_distance_ = errors_.error_dist;
@@ -132,10 +142,18 @@ private:
             }
         }
         
-        act_ = std::tanh(ke_act_ * std::abs( error_angle_ - M_PI / 45)) -1 ;
+        act_ = - (std::tanh(ke_act_ * (std::abs( error_angle_) - M_PI / angle_sensitivity_)) -1)/2 ;
+
+        #ifdef DEBUG_ACT
+            RCLCPP_INFO(
+                this->get_logger(),
+                "act: %g,",
+                act_
+            );
+        #endif
 
         if ( error_distance_ < error_threshold_dis_ ){
-            linear_vel_ = 0;
+            //linear_vel_ = 0;
             linear_vel_ = 0.04 * act_;
 
         } else {

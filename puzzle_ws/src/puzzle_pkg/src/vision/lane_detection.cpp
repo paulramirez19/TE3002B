@@ -1,4 +1,4 @@
-#define LANE_VIEW
+//#define LANE_VIEW
 //#define COORDS_PRINT
 //#define ANGLE_VIEW
 //#define ERRORS_VIEW
@@ -269,8 +269,8 @@ private:
         
         cv::Mat blurred = apply_gaussian_blur(cropped_frame);
 
+        //Aqui issue
         cv::Mat closed = apply_closing(blurred, cv::Size(5, 5), 3);
-        publish_processed_image(closed);
         
         cv::Mat thresholded = apply_otsu_threshold(closed);
         double error_ang = detect_lane_center(thresholded);
